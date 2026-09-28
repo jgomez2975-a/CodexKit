@@ -3,7 +3,7 @@ name: Build GoDog Codex TIPA
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, godog-codex-ios]
 
 jobs:
   build-ios:
