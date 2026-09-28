@@ -12,6 +12,7 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>GoDog Codex</string>
+	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>2.0.0</string>
