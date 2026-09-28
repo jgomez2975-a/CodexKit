@@ -35,7 +35,15 @@ jobs:
           set -euo pipefail
           APP="$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/CodexKitIOSDemo.app"
           test -d "$APP"
-          codesign --force --sign - --timestamp=none "$APP"
+          # Sign embedded frameworks/bundles before the app; CodexKit's
+          # Realm/GRDB dependencies are nested code on device builds.
+          find "$APP/Frameworks" -type d -name '*.framework' -print0 | while IFS= read -r -d '' item; do
+            codesign --force --sign - --timestamp=none "$item"
+          done
+          find "$APP" -type d -name '*.appex' -print0 | while IFS= read -r -d '' item; do
+            codesign --force --sign - --timestamp=none "$item"
+          done
+          codesign --force --deep --sign - --timestamp=none "$APP"
           rm -rf "$RUNNER_TEMP/package"
           mkdir -p "$RUNNER_TEMP/package/Payload"
           ditto "$APP" "$RUNNER_TEMP/package/Payload/GoDog Codex.app"
