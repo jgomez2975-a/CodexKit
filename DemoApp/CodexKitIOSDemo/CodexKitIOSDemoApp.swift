@@ -1,6 +1,13 @@
 import SwiftUI
 import Security
 
+enum DemoTab: Hashable {
+    case assistant
+    case structuredOutput
+    case memory
+    case healthCoach
+}
+
 @main
 struct GoDogCodexApp: App {
     var body: some Scene {
