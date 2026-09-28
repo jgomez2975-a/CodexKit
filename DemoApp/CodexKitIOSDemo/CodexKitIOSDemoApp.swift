@@ -112,13 +112,44 @@ private struct GoDogChatView: View {
                     Text(errorText).font(.footnote).foregroundStyle(.red).padding(.horizontal)
                 }
                 HStack(alignment: .bottom, spacing: 10) {
-                    TextField("发消息给 Codex…", text: $draft, axis: .vertical)
-                        .lineLimit(1...5).focused($inputFocused).padding(12)
-                        .background(.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 18))
+                    ZStack(alignment: .topLeading) {
+                        if draft.isEmpty {
+                            Text("发消息给 Codex…")
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 15)
+                                .padding(.vertical, 12)
+                                .allowsHitTesting(false)
+                        }
+                        TextEditor(text: $draft)
+                            .focused($inputFocused)
+                            .frame(minHeight: 44, maxHeight: 120)
+                            .scrollContentBackground(.hidden)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .contentShape(Rectangle())
+                    }
+                    .frame(minHeight: 52)
+                    .background(.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 18))
+                    .contentShape(Rectangle())
+                    .onTapGesture { inputFocused = true }
+
                     Button { Task { await send() } } label: {
                         if busy { ProgressView() } else { Image(systemName: "arrow.up.circle.fill").font(.system(size: 34)) }
-                    }.disabled(busy || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || apiKey.isEmpty)
-                }.padding()
+                    }
+                    .frame(width: 44, height: 52)
+                    .contentShape(Rectangle())
+                    .disabled(busy || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || apiKey.isEmpty)
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 6)
+                .background(.bar)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("完成") { inputFocused = false }
+                    }
+                }
             }
             .navigationTitle("GoDog Codex")
             .navigationBarTitleDisplayMode(.inline)
