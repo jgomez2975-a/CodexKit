@@ -1,0 +1,52 @@
+name: Build GoDog Codex TIPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-ios:
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Select Xcode
+        run: |
+          XCODE_APP=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+      - name: Build unsigned iOS app
+        run: |
+          xcodebuild \
+            -project DemoApp/CodexKitDemo.xcodeproj \
+            -scheme CodexKitIOSDemo \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
+      - name: Ad-hoc sign and package
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/CodexKitIOSDemo.app"
+          test -d "$APP"
+          codesign --force --sign - --timestamp=none "$APP"
+          rm -rf "$RUNNER_TEMP/package"
+          mkdir -p "$RUNNER_TEMP/package/Payload"
+          ditto "$APP" "$RUNNER_TEMP/package/Payload/GoDog Codex.app"
+          cd "$RUNNER_TEMP/package"
+          /usr/bin/zip -qry "$GITHUB_WORKSPACE/GoDog-Codex.tipa" Payload
+          shasum -a 256 "$GITHUB_WORKSPACE/GoDog-Codex.tipa" > "$GITHUB_WORKSPACE/GoDog-Codex.tipa.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GoDog-Codex-tipa
+          path: |
+            GoDog-Codex.tipa
+            GoDog-Codex.tipa.sha256
+          if-no-files-found: error
+          retention-days: 30
