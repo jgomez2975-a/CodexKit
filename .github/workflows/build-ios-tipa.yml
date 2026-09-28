@@ -33,7 +33,7 @@ jobs:
       - name: Ad-hoc sign and package
         run: |
           set -euo pipefail
-          APP="$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/CodexKitIOSDemo.app"
+          APP="$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/GoDog Codex.app"
           test -d "$APP"
           # Sign embedded frameworks/bundles before the app; CodexKit's
           # Realm/GRDB dependencies are nested code on device builds.
